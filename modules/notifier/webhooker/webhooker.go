@@ -69,8 +69,15 @@ func (wh *webhook) Send(log *logrus.Logger, n logger.LogRecord) {
 		log.Errorf("Can't create webhook request: %v", err)
 		return
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	for k, v := range wh.opts.ExtraHeaders {
+		if k == "Content-Type" {
+			continue
+		}
+		if k == "Host" {
+			req.Host = v
+		}
 		req.Header.Add(k, v)
 	}
 

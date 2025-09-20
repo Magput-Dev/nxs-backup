@@ -7,7 +7,7 @@ RUN case "$(apk --print-arch)" in \
       aarch64) export ARCH='arm64' ;; \
       armv7) export ARCH='arm' ;; \
     esac; \
-    wget -O /tmp/nxsb.tgz "https://github.com/nixys/nxs-backup/releases/download/$VERSION/nxs-backup-$ARCH.tar.gz"; \
+    wget -O /tmp/nxsb.tgz "https://github.com/magput-dev/nxs-backup/releases/download/$VERSION/nxs-backup-$ARCH.tar.gz"; \
     tar xf /tmp/nxsb.tgz
 
 

@@ -90,15 +90,16 @@ jobs:
     - name: Login to Registry Hub
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_TOKEN }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: ghcr.io
 
     - name: Docker meta for binary
       id: meta-bin
       uses: docker/metadata-action@v5
       with:
         images: |
-          nixyslab/nxs-backup-bin
+          ghcr.io/magput-dev/nxs-backup-bin
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
@@ -110,7 +111,7 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: |
-          nixyslab/nxs-backup
+          ghcr.io/magput-dev/nxs-backup
         flavor: |
           latest=false
         tags: |
@@ -125,7 +126,7 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: |
-          nixyslab/nxs-backup
+          ghcr.io/magput-dev/nxs-backup
         tags: |
           type=semver,pattern={{version}}
           type=semver,pattern={{version}},suffix=-debian
@@ -135,6 +136,45 @@ jobs:
           type=semver,pattern={{major}},suffix=-debian
           type=sha,prefix=,format=long
           debian
+
+    - name: Docker meta for redis60
+      id: meta-redis60
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/magput-dev/nxs-backup
+        tags: |
+          type=semver,pattern={{version}},suffix=-redis60
+          type=semver,pattern={{major}}.{{minor}},suffix=-redis60
+          type=semver,pattern={{major}},suffix=-redis60
+          type=sha,prefix=,format=long,suffix=-redis60
+          redis60
+
+    - name: Docker meta for psql12
+      id: meta-psql12
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/magput-dev/nxs-backup
+        tags: |
+          type=semver,pattern={{version}},suffix=-psql12
+          type=semver,pattern={{major}}.{{minor}},suffix=-psql12
+          type=semver,pattern={{major}},suffix=-psql12
+          type=sha,prefix=,format=long,suffix=-psql12
+          psql12
+
+    - name: Docker meta for mysql80
+      id: meta-mysql80
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/magput-dev/nxs-backup
+        tags: |
+          type=semver,pattern={{version}},suffix=-mysql80
+          type=semver,pattern={{major}}.{{minor}},suffix=-mysql80
+          type=semver,pattern={{major}},suffix=-mysql80
+          type=sha,prefix=,format=long,suffix=-mysql80
+          mysql80
 
     - name: Build and push binary
       uses: docker/build-push-action@v5
@@ -154,7 +194,7 @@ jobs:
         context: .
         file: .docker/Dockerfile-alpine
         build-contexts: |
-          nixyslab/nxs-backup-bin=docker-image://nixyslab/nxs-backup-bin:${{ github.sha }}
+          ghcr.io/magput-dev/nxs-backup-bin=docker-image://ghcr.io/magput-dev/nxs-backup-bin:${{ github.sha }}
         platforms: linux/amd64,linux/arm64,linux/arm/v8
         push: true
         tags: ${{ steps.meta-alpine.outputs.tags }}
@@ -167,9 +207,48 @@ jobs:
         context: .
         file: .docker/Dockerfile-debian
         build-contexts: |
-          nixyslab/nxs-backup-bin=docker-image://nixyslab/nxs-backup-bin:${{ github.sha }}
+          ghcr.io/magput-dev/nxs-backup-bin=docker-image://ghcr.io/magput-dev/nxs-backup-bin:${{ github.sha }}
         platforms: linux/amd64,linux/arm64,linux/arm/v8
         push: true
         tags: ${{ steps.meta-debian.outputs.tags }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push redis60
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/redis/Dockerfile-redis60
+        build-contexts: |
+          ghcr.io/magput-dev/nxs-backup-bin=docker-image://ghcr.io/magput-dev/nxs-backup-bin:${{ github.sha }}
+        platforms: linux/amd64,linux/arm64,linux/arm/v8
+        push: true
+        tags: ${{ steps.meta-redis60.outputs.tags }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push psql12
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/postgres/Dockerfile-psql12
+        build-contexts: |
+          ghcr.io/magput-dev/nxs-backup-bin=docker-image://ghcr.io/magput-dev/nxs-backup-bin:${{ github.sha }}
+        platforms: linux/amd64,linux/arm64,linux/arm/v8
+        push: true
+        tags: ${{ steps.meta-psql12.outputs.tags }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push mysql80
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .docker/mysql/Dockerfile-mysql80
+        build-contexts: |
+          ghcr.io/magput-dev/nxs-backup-bin=docker-image://ghcr.io/magput-dev/nxs-backup-bin:${{ github.sha }}
+        platforms: linux/amd64,linux/arm64,linux/arm/v8
+        push: true
+        tags: ${{ steps.meta-mysql80.outputs.tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

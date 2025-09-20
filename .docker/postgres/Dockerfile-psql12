@@ -1,4 +1,4 @@
-FROM nixyslab/nxs-backup-bin AS bin
+FROM ghcr.io/magput-dev/nxs-backup-bin AS bin
 
 FROM debian:11-slim
 
